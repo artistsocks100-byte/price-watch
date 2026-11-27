@@ -9,15 +9,14 @@
 *{box-sizing:border-box}
 body{margin:0;background:#080d18;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 header{padding:22px 18px;border-bottom:1px solid #1e293b;background:#0b1220;position:sticky;top:0;z-index:5}
-.wrap{max-width:1050px;margin:auto}
+.wrap,main{max-width:1050px;margin:auto}
 .brand{font-size:25px;font-weight:900;letter-spacing:1px;color:#60a5fa}
 .sub{font-size:11px;color:#64748b;letter-spacing:2px;margin-top:5px}
-main{max-width:1050px;margin:auto;padding:22px 16px}
+main{padding:22px 16px}
 h2{font-size:19px;margin:0 0 16px}
 .card{background:#111827;border:1px solid #263247;border-radius:16px;padding:18px;margin-bottom:18px}
 input,button{font:inherit;border-radius:10px;padding:13px}
 input{background:#0b1220;color:white;border:1px solid #334155;width:100%;outline:none;margin-bottom:10px}
-input:focus{border-color:#60a5fa}
 button{border:0;cursor:pointer;font-weight:700}
 .primary{background:#2563eb;color:white;width:100%}
 .secondary{background:#1e293b;color:#e5e7eb}
@@ -42,238 +41,113 @@ footer{text-align:center;padding:25px;color:#64748b;font-size:12px}
 .note{font-size:12px;color:#94a3b8;line-height:1.7}
 .target{color:#fbbf24;font-size:13px;margin-top:8px}
 .alert{color:#34d399;font-weight:700;font-size:13px;margin-top:8px}
+.down{color:#34d399;font-weight:700}
+.up{color:#f87171;font-weight:700}
+.history{border-top:1px solid #263247;margin-top:12px;padding-top:10px;font-size:12px;color:#94a3b8;line-height:1.9}
 @media(min-width:650px){.products{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-<header>
- <div class="wrap">
-  <div class="brand">PRICE WATCH</div>
-  <div class="sub">SMART PRICE TRACKING</div>
- </div>
-</header>
-
+<header><div class="wrap"><div class="brand">PRICE WATCH</div><div class="sub">SMART PRICE TRACKING</div></div></header>
 <main>
- <section class="card">
-  <h2>가격 추적 현황</h2>
-  <div class="stats">
-   <div class="stat"><small>등록 상품</small><strong id="count" class="blue">0</strong></div>
-   <div class="stat"><small>가격 하락 상품</small><strong id="drops" class="green">0</strong></div>
-  </div>
- </section>
+<section class="card">
+<h2>가격 추적 현황</h2>
+<div class="stats">
+<div class="stat"><small>등록 상품</small><strong id="count" class="blue">0</strong></div>
+<div class="stat"><small>가격 하락 상품</small><strong id="drops" class="green">0</strong></div>
+</div>
+</section>
 
- <section class="card">
-  <h2>상품 등록</h2>
-  <input id="name" placeholder="상품 이름">
-  <input id="price" type="number" min="1" placeholder="현재 가격 (원)">
-  <input id="target" type="number" min="1" placeholder="목표 가격 (선택)">
-  <input id="url" type="url" placeholder="상품 URL (선택)">
-  <button class="primary" onclick="addProduct()">상품 등록하기</button>
- </section>
+<section class="card">
+<h2>상품 등록</h2>
+<input id="name" placeholder="상품 이름">
+<input id="price" type="number" min="1" placeholder="현재 가격 (원)">
+<input id="target" type="number" min="1" placeholder="목표 가격 (선택)">
+<input id="url" type="url" placeholder="상품 URL (선택)">
+<button class="primary" onclick="addProduct()">상품 등록하기</button>
+</section>
 
- <section class="card">
-  <h2>가격 비교</h2>
-  <select id="sort" onchange="render()">
-   <option value="low">가격 낮은 순</option>
-   <option value="high">가격 높은 순</option>
-   <option value="recent">최근 등록 순</option>
-  </select>
-  <div class="products" id="products"></div>
- </section>
+<section class="card">
+<h2>가격 비교</h2>
+<select id="sort" onchange="render()">
+<option value="low">가격 낮은 순</option>
+<option value="high">가격 높은 순</option>
+<option value="recent">최근 등록 순</option>
+</select>
+<div class="products" id="products"></div>
+</section>
 
- <section class="card">
-  <h2>가격 기록</h2>
-  <select id="chartSelect" onchange="drawChart()">
-   <option value="">상품 선택</option>
-  </select>
-  <canvas id="chart"></canvas>
-  <p class="note">등록한 날짜별 가격 기록을 표시합니다.</p>
- </section>
+<section class="card">
+<h2>가격 기록</h2>
+<select id="chartSelect" onchange="drawChart()"><option value="">상품 선택</option></select>
+<canvas id="chart"></canvas>
+<p class="note">등록한 날짜별 가격 기록을 표시합니다.</p>
+</section>
 
- <section class="card">
-  <h2>데이터 관리</h2>
-  <button class="secondary" onclick="exportData()">데이터 내보내기</button>
-  <button class="danger" onclick="clearData()">전체 삭제</button>
-  <p class="note">데이터는 현재 브라우저에 저장됩니다.</p>
- </section>
+<section class="card">
+<h2>데이터 관리</h2>
+<button class="secondary" onclick="exportData()">데이터 내보내기</button>
+<button class="danger" onclick="clearData()">전체 삭제</button>
+<p class="note">데이터는 현재 브라우저에 저장됩니다.</p>
+</section>
 </main>
-
 <footer>PRICE WATCH · PRICE TRACKING PLATFORM</footer>
 
 <script>
 const KEY="price_watch_v1";
 let items=JSON.parse(localStorage.getItem(KEY)||"[]");
 
-function save(){
- localStorage.setItem(KEY,JSON.stringify(items));
-}
-
-function money(n){
- return Number(n).toLocaleString("ko-KR")+"원";
-}
+function save(){localStorage.setItem(KEY,JSON.stringify(items))}
+function money(n){return Number(n).toLocaleString("ko-KR")+"원"}
 
 function addProduct(){
  const name=document.getElementById("name").value.trim();
  const price=Number(document.getElementById("price").value);
  const target=Number(document.getElementById("target").value)||null;
  const url=document.getElementById("url").value.trim();
-
- if(!name||!price||price<=0){
-  alert("상품 이름과 올바른 가격을 입력하세요.");
-  return;
- }
-
- if(target!==null&&target<=0){
-  alert("목표 가격을 올바르게 입력하세요.");
-  return;
- }
-
+ if(!name||!price||price<=0){alert("상품 이름과 올바른 가격을 입력하세요.");return}
  if(url){
-  try{
-   const u=new URL(url);
-   if(u.protocol!=="https:"&&u.protocol!=="http:"){
-    alert("올바른 URL을 입력하세요.");
-    return;
-   }
-  }catch(e){
-   alert("URL 형식이 올바르지 않습니다.");
-   return;
-  }
+  try{const u=new URL(url);if(!["https:","http:"].includes(u.protocol))throw 0}
+  catch(e){alert("올바른 URL을 입력하세요.");return}
  }
-
  const now=new Date().toLocaleString("ko-KR");
-
- items.push({
-  id:Date.now(),
-  name,price,target,url,created:now,
-  history:[{price,date:now}]
- });
-
+ items.push({id:Date.now(),name,price,target,url,created:now,history:[{price,date:now}]});
  save();
- document.getElementById("name").value="";
- document.getElementById("price").value="";
- document.getElementById("target").value="";
- document.getElementById("url").value="";
+ ["name","price","target","url"].forEach(id=>document.getElementById(id).value="");
  render();
-
- if(target&&price<=target){
-  alert("목표 가격에 도달했습니다!");
- }
+ if(target&&price<=target)alert("목표 가격에 도달했습니다!");
 }
 
 function updatePrice(id){
- const item=items.find(x=>x.id===id);
- if(!item)return;
-
+ const item=items.find(x=>x.id===id);if(!item)return;
  const input=prompt("새 가격을 입력하세요 (원):");
  if(input===null)return;
  const p=Number(input);
-
- if(!Number.isFinite(p)||p<=0){
-  alert("올바른 가격을 입력하세요.");
-  return;
- }
-
+ if(!Number.isFinite(p)||p<=0){alert("올바른 가격을 입력하세요.");return}
  const old=item.price;
  item.price=p;
- item.history.push({
-  price:p,
-  date:new Date().toLocaleString("ko-KR")
- });
-
- save();
- render();
-
- if(item.target&&p<=item.target&&old>item.target){
-  alert(item.name+" 상품이 목표 가격에 도달했습니다!");
- }
+ item.history.push({price:p,date:new Date().toLocaleString("ko-KR")});
+ save();render();
+ if(item.target&&p<=item.target&&old>item.target)alert(item.name+" 상품이 목표 가격에 도달했습니다!");
 }
 
 function updateTarget(id){
- const item=items.find(x=>x.id===id);
- if(!item)return;
-
+ const item=items.find(x=>x.id===id);if(!item)return;
  const input=prompt("목표 가격을 입력하세요 (원):",item.target||"");
  if(input===null)return;
-
  const value=input.trim()===""?null:Number(input);
-
- if(value!==null&&(!Number.isFinite(value)||value<=0)){
-  alert("올바른 목표 가격을 입력하세요.");
-  return;
- }
-
- item.target=value;
- save();
- render();
-
- if(value&&item.price<=value){
-  alert("현재 가격이 이미 목표 가격 이하입니다!");
- }
+ if(value!==null&&(!Number.isFinite(value)||value<=0)){alert("올바른 목표 가격을 입력하세요.");return}
+ item.target=value;save();render();
+ if(value&&item.price<=value)alert("현재 가격이 이미 목표 가격 이하입니다!");
 }
 
 function removeProduct(id){
  if(!confirm("이 상품을 삭제하시겠습니까?"))return;
- items=items.filter(x=>x.id!==id);
- save();
- render();
-}
-
-function render(){
- const sort=document.getElementById("sort").value;
- let list=[...items];
-
- if(sort==="low")list.sort((a,b)=>a.price-b.price);
- if(sort==="high")list.sort((a,b)=>b.price-a.price);
- if(sort==="recent")list.sort((a,b)=>b.id-a.id);
-
- document.getElementById("count").textContent=items.length;
- document.getElementById("drops").textContent=
-  items.filter(x=>x.history.length>1&&
-  x.price<x.history[x.history.length-2].price).length;
-
- const area=document.getElementById("products");
-
- if(!list.length){
-  area.innerHTML='<div class="empty">등록된 상품이 없습니다.</div>';
- }else{
-  area.innerHTML=list.map(x=>{
-   const min=Math.min(...x.history.map(h=>h.price));
-   const reached=x.target&&x.price<=x.target;
-
-   return `
-   <div class="product">
-    <h3>${esc(x.name)}</h3>
-    <div class="price">${money(x.price)}</div>
-    <div class="meta">기록된 최저가: ${money(min)}</div>
-    <div class="meta">가격 기록: ${x.history.length}회</div>
-    ${x.target?`<div class="target">목표 가격: ${money(x.target)}</div>`:""}
-    ${reached?'<div class="alert">목표 가격 달성!</div>':""}
-    <div class="actions">
-     <button class="secondary" onclick="updatePrice(${x.id})">가격 갱신</button>
-     <button class="secondary" onclick="updateTarget(${x.id})">목표 가격</button>
-     <button class="secondary" onclick="selectChart(${x.id})">그래프</button>
-     ${x.url?`<button class="secondary" onclick="openLink(${x.id})">상품 페이지</button>`:""}
-     <button class="danger" onclick="removeProduct(${x.id})">삭제</button>
-    </div>
-   </div>`;
-  }).join("");
- }
-
- const select=document.getElementById("chartSelect");
- const selected=select.value;
- select.innerHTML='<option value="">상품 선택</option>'+
-  items.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
-
- if(items.some(x=>String(x.id)===selected))select.value=selected;
- drawChart();
+ items=items.filter(x=>x.id!==id);save();render();
 }
 
 function esc(s){
- return String(s).replace(/[&<>"']/g,c=>({
-  "&":"&amp;","<":"&lt;",">":"&gt;",
-  '"':"&quot;","'":"&#39;"
- }[c]));
+ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
 function openLink(id){
@@ -287,96 +161,99 @@ function selectChart(id){
  document.getElementById("chart").scrollIntoView({behavior:"smooth"});
 }
 
+function render(){
+ const sort=document.getElementById("sort").value;
+ let list=[...items];
+ if(sort==="low")list.sort((a,b)=>a.price-b.price);
+ if(sort==="high")list.sort((a,b)=>b.price-a.price);
+ if(sort==="recent")list.sort((a,b)=>b.id-a.id);
+
+ document.getElementById("count").textContent=items.length;
+ document.getElementById("drops").textContent=items.filter(x=>{
+  const h=x.history||[];
+  return h.length>1&&h[h.length-1].price<h[h.length-2].price;
+ }).length;
+
+ const area=document.getElementById("products");
+ if(!list.length){area.innerHTML='<div class="empty">등록된 상품이 없습니다.</div>'}
+ else{
+  area.innerHTML=list.map(x=>{
+   const h=x.history||[];
+   const min=Math.min(...h.map(v=>v.price));
+   const first=h.length?h[0].price:x.price;
+   const change=first-x.price;
+   const percent=first>0?(change/first*100):0;
+   const previous=h.length>1?h[h.length-2].price:null;
+   const lastChange=previous===null?0:x.price-previous;
+   const reached=x.target&&x.price<=x.target;
+   const history=h.slice().reverse().map(v=>
+    `<div>${esc(v.date)} · ${money(v.price)}</div>`
+   ).join("");
+   return `<div class="product">
+   <h3>${esc(x.name)}</h3>
+   <div class="price">${money(x.price)}</div>
+   <div class="meta">기록된 최저가: ${money(min)}</div>
+   <div class="meta">최초 등록가 대비:
+   <span class="${change>=0?'down':'up'}">${change>=0?'▼':'▲'} ${money(Math.abs(change))} (${Math.abs(percent).toFixed(1)}%)</span></div>
+   ${previous!==null?`<div class="meta">직전 기록 대비: <span class="${lastChange<=0?'down':'up'}">${lastChange<=0?'▼':'▲'} ${money(Math.abs(lastChange))}</span></div>`:""}
+   <div class="meta">가격 기록: ${h.length}회</div>
+   ${x.target?`<div class="target">목표 가격: ${money(x.target)}</div>`:""}
+   ${reached?'<div class="alert">목표 가격 달성!</div>':""}
+   <div class="history"><strong>가격 변동 내역</strong>${history}</div>
+   <div class="actions">
+   <button class="secondary" onclick="updatePrice(${x.id})">가격 갱신</button>
+   <button class="secondary" onclick="updateTarget(${x.id})">목표 가격</button>
+   <button class="secondary" onclick="selectChart(${x.id})">그래프</button>
+   ${x.url?`<button class="secondary" onclick="openLink(${x.id})">상품 페이지</button>`:""}
+   <button class="danger" onclick="removeProduct(${x.id})">삭제</button>
+   </div></div>`;
+  }).join("");
+ }
+
+ const select=document.getElementById("chartSelect");
+ const selected=select.value;
+ select.innerHTML='<option value="">상품 선택</option>'+items.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
+ if(items.some(x=>String(x.id)===selected))select.value=selected;
+ drawChart();
+}
+
 function drawChart(){
  const canvas=document.getElementById("chart");
  const ctx=canvas.getContext("2d");
- const box=canvas.getBoundingClientRect();
- if(!box.width)return;
-
+ const box=canvas.getBoundingClientRect();if(!box.width)return;
  const dpr=window.devicePixelRatio||1;
- canvas.width=box.width*dpr;
- canvas.height=230*dpr;
- ctx.scale(dpr,dpr);
-
- const w=box.width,h=230;
- ctx.clearRect(0,0,w,h);
-
+ canvas.width=box.width*dpr;canvas.height=230*dpr;
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ const w=box.width,h=230;ctx.clearRect(0,0,w,h);
  const id=document.getElementById("chartSelect").value;
  const item=items.find(x=>String(x.id)===id);
-
  if(!item||!item.history.length){
-  ctx.fillStyle="#64748b";
-  ctx.font="14px sans-serif";
-  ctx.textAlign="center";
-  ctx.fillText("상품을 선택하면 가격 그래프가 표시됩니다.",w/2,h/2);
-  return;
+  ctx.fillStyle="#64748b";ctx.font="14px sans-serif";ctx.textAlign="center";
+  ctx.fillText("상품을 선택하면 가격 그래프가 표시됩니다.",w/2,h/2);return;
  }
-
  const values=item.history.map(x=>x.price);
- const max=Math.max(...values);
- const min=Math.min(...values);
- const range=max-min||max*0.1||1;
- const pad=35;
-
- ctx.strokeStyle="#334155";
- ctx.lineWidth=1;
-
- for(let i=0;i<4;i++){
-  const y=pad+i*(h-2*pad)/3;
-  ctx.beginPath();
-  ctx.moveTo(30,y);
-  ctx.lineTo(w-10,y);
-  ctx.stroke();
- }
-
- const pts=values.map((v,i)=>({
-  x:30+i*(w-40)/Math.max(values.length-1,1),
-  y:pad+(max-v)*(h-2*pad)/range
- }));
-
- ctx.strokeStyle="#60a5fa";
- ctx.lineWidth=3;
- ctx.beginPath();
-
- pts.forEach((p,i)=>{
-  if(i===0)ctx.moveTo(p.x,p.y);
-  else ctx.lineTo(p.x,p.y);
- });
-
+ const max=Math.max(...values),min=Math.min(...values);
+ const range=max-min||max*.1||1,pad=35;
+ ctx.strokeStyle="#334155";ctx.lineWidth=1;
+ for(let i=0;i<4;i++){const y=pad+i*(h-2*pad)/3;ctx.beginPath();ctx.moveTo(30,y);ctx.lineTo(w-10,y);ctx.stroke()}
+ const pts=values.map((v,i)=>({x:30+i*(w-40)/Math.max(values.length-1,1),y:pad+(max-v)*(h-2*pad)/range}));
+ ctx.strokeStyle="#60a5fa";ctx.lineWidth=3;ctx.beginPath();
+ pts.forEach((p,i)=>{if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)});
  ctx.stroke();
-
- pts.forEach(p=>{
-  ctx.beginPath();
-  ctx.arc(p.x,p.y,4,0,Math.PI*2);
-  ctx.fillStyle="#60a5fa";
-  ctx.fill();
- });
-
- ctx.fillStyle="#94a3b8";
- ctx.font="12px sans-serif";
- ctx.textAlign="left";
- ctx.fillText(money(max),4,pad);
- ctx.fillText(money(min),4,h-pad);
+ pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle="#60a5fa";ctx.fill()});
+ ctx.fillStyle="#94a3b8";ctx.font="12px sans-serif";ctx.textAlign="left";
+ ctx.fillText(money(max),4,pad);ctx.fillText(money(min),4,h-pad);
 }
 
 function exportData(){
- const blob=new Blob([JSON.stringify(items,null,2)],{
-  type:"application/json"
- });
- const a=document.createElement("a");
- a.href=URL.createObjectURL(blob);
- a.download="price-watch-data.json";
- a.click();
- URL.revokeObjectURL(a.href);
+ const blob=new Blob([JSON.stringify(items,null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+ a.download="price-watch-data.json";a.click();URL.revokeObjectURL(a.href);
 }
-
 function clearData(){
  if(!confirm("모든 상품 기록을 삭제할까요?"))return;
- items=[];
- save();
- render();
+ items=[];save();render();
 }
-
 window.addEventListener("resize",drawChart);
 render();
 </script>
