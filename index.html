@@ -1,0 +1,363 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRICE WATCH</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#080d18;color:#e5e7eb;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+header{
+ padding:22px 18px;border-bottom:1px solid #1e293b;
+ background:#0b1220;position:sticky;top:0;z-index:5;
+}
+.wrap{max-width:1050px;margin:auto}
+.brand{font-size:25px;font-weight:900;letter-spacing:1px;color:#60a5fa}
+.sub{font-size:11px;color:#64748b;letter-spacing:2px;margin-top:5px}
+main{max-width:1050px;margin:auto;padding:22px 16px}
+h2{font-size:19px;margin:0 0 16px}
+.card{
+ background:#111827;border:1px solid #263247;border-radius:16px;
+ padding:18px;margin-bottom:18px;
+}
+input,button{
+ font:inherit;border-radius:10px;padding:13px;
+}
+input{
+ background:#0b1220;color:white;border:1px solid #334155;
+ width:100%;outline:none;margin-bottom:10px;
+}
+input:focus{border-color:#60a5fa}
+button{
+ border:0;cursor:pointer;font-weight:700;
+}
+.primary{background:#2563eb;color:white;width:100%}
+.secondary{background:#1e293b;color:#e5e7eb}
+.danger{background:#7f1d1d;color:#fecaca}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:#0b1220;border-radius:12px;padding:16px}
+.stat small{color:#94a3b8}
+.stat strong{display:block;font-size:24px;margin-top:8px}
+.green{color:#34d399}
+.blue{color:#60a5fa}
+.products{display:grid;gap:12px}
+.product{
+ background:#0b1220;border:1px solid #263247;
+ border-radius:14px;padding:16px;
+}
+.product h3{margin:0 0 10px;font-size:16px;word-break:break-word}
+.price{font-size:24px;font-weight:800}
+.meta{color:#94a3b8;font-size:12px;margin-top:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.actions button{padding:10px 13px}
+select{
+ background:#0b1220;color:white;border:1px solid #334155;
+ padding:12px;border-radius:10px;width:100%;margin-bottom:12px;
+}
+canvas{width:100%;height:230px;display:block}
+.empty{text-align:center;padding:28px;color:#64748b}
+footer{text-align:center;padding:25px;color:#64748b;font-size:12px}
+.note{font-size:12px;color:#94a3b8;line-height:1.7}
+@media(min-width:650px){
+ .stats{grid-template-columns:1fr 1fr}
+ .products{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="wrap">
+  <div class="brand">PRICE WATCH</div>
+  <div class="sub">SMART PRICE TRACKING</div>
+ </div>
+</header>
+
+<main>
+ <section class="card">
+  <h2>가격 추적 현황</h2>
+  <div class="stats">
+   <div class="stat">
+    <small>등록 상품</small>
+    <strong id="count" class="blue">0</strong>
+   </div>
+   <div class="stat">
+    <small>가격 하락 상품</small>
+    <strong id="drops" class="green">0</strong>
+   </div>
+  </div>
+ </section>
+
+ <section class="card">
+  <h2>상품 등록</h2>
+  <input id="name" placeholder="상품 이름">
+  <input id="price" type="number" min="1" placeholder="현재 가격 (원)">
+  <input id="url" type="url" placeholder="상품 URL (선택)">
+  <button class="primary" onclick="addProduct()">상품 등록하기</button>
+ </section>
+
+ <section class="card">
+  <h2>가격 비교</h2>
+  <select id="sort" onchange="render()">
+   <option value="low">가격 낮은 순</option>
+   <option value="high">가격 높은 순</option>
+   <option value="recent">최근 등록 순</option>
+  </select>
+  <div class="products" id="products"></div>
+ </section>
+
+ <section class="card">
+  <h2>가격 기록</h2>
+  <select id="chartSelect" onchange="drawChart()">
+   <option value="">상품 선택</option>
+  </select>
+  <canvas id="chart"></canvas>
+  <p class="note">등록한 날짜별 가격 기록을 표시합니다.</p>
+ </section>
+
+ <section class="card">
+  <h2>데이터 관리</h2>
+  <button class="secondary" onclick="exportData()">데이터 내보내기</button>
+  <button class="danger" onclick="clearData()">전체 삭제</button>
+  <p class="note">데이터는 현재 브라우저에 저장됩니다.</p>
+ </section>
+</main>
+
+<footer>PRICE WATCH · PRICE TRACKING PLATFORM</footer>
+
+<script>
+const KEY="price_watch_v1";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+
+function save(){
+ localStorage.setItem(KEY,JSON.stringify(items));
+}
+
+function money(n){
+ return Number(n).toLocaleString("ko-KR")+"원";
+}
+
+function addProduct(){
+ const name=document.getElementById("name").value.trim();
+ const price=Number(document.getElementById("price").value);
+ const url=document.getElementById("url").value.trim();
+
+ if(!name||!price||price<=0){
+  alert("상품 이름과 올바른 가격을 입력하세요.");
+  return;
+ }
+
+ if(url){
+  try{
+   const u=new URL(url);
+   if(u.protocol!=="https:"&&u.protocol!=="http:"){
+    alert("올바른 URL을 입력하세요.");
+    return;
+   }
+  }catch(e){
+   alert("URL 형식이 올바르지 않습니다.");
+   return;
+  }
+ }
+
+ const now=new Date().toLocaleString("ko-KR");
+
+ items.push({
+  id:Date.now(),
+  name,
+  price,
+  url,
+  created:now,
+  history:[{price,date:now}]
+ });
+
+ save();
+ document.getElementById("name").value="";
+ document.getElementById("price").value="";
+ document.getElementById("url").value="";
+ render();
+}
+
+function updatePrice(id){
+ const item=items.find(x=>x.id===id);
+ if(!item)return;
+
+ const p=Number(prompt("새 가격을 입력하세요 (원):"));
+ if(!p||p<=0)return;
+
+ item.price=p;
+ item.history.push({
+  price:p,
+  date:new Date().toLocaleString("ko-KR")
+ });
+
+ save();
+ render();
+}
+
+function removeProduct(id){
+ if(!confirm("이 상품을 삭제하시겠습니까?"))return;
+ items=items.filter(x=>x.id!==id);
+ save();
+ render();
+}
+
+function render(){
+ const sort=document.getElementById("sort").value;
+ let list=[...items];
+
+ if(sort==="low")list.sort((a,b)=>a.price-b.price);
+ if(sort==="high")list.sort((a,b)=>b.price-a.price);
+ if(sort==="recent")list.sort((a,b)=>b.id-a.id);
+
+ document.getElementById("count").textContent=items.length;
+ document.getElementById("drops").textContent=
+  items.filter(x=>x.history.length>1&&
+  x.price<x.history[x.history.length-2].price).length;
+
+ const area=document.getElementById("products");
+
+ if(!list.length){
+  area.innerHTML='<div class="empty">등록된 상품이 없습니다.</div>';
+ }else{
+  area.innerHTML=list.map(x=>{
+   const min=Math.min(...x.history.map(h=>h.price));
+   return `
+   <div class="product">
+    <h3>${esc(x.name)}</h3>
+    <div class="price">${money(x.price)}</div>
+    <div class="meta">기록된 최저가: ${money(min)}</div>
+    <div class="meta">가격 기록: ${x.history.length}회</div>
+    <div class="actions">
+     <button class="secondary" onclick="updatePrice(${x.id})">가격 갱신</button>
+     <button class="secondary" onclick="selectChart(${x.id})">그래프</button>
+     ${x.url?`<button class="secondary" onclick="openLink(${x.id})">상품 페이지</button>`:""}
+     <button class="danger" onclick="removeProduct(${x.id})">삭제</button>
+    </div>
+   </div>`;
+  }).join("");
+ }
+
+ const select=document.getElementById("chartSelect");
+ const selected=select.value;
+ select.innerHTML='<option value="">상품 선택</option>'+
+  items.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
+
+ if(items.some(x=>String(x.id)===selected))select.value=selected;
+ drawChart();
+}
+
+function esc(s){
+ return String(s).replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",
+  '"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+function openLink(id){
+ const x=items.find(a=>a.id===id);
+ if(x&&x.url)window.open(x.url,"_blank","noopener");
+}
+
+function selectChart(id){
+ document.getElementById("chartSelect").value=String(id);
+ drawChart();
+ document.getElementById("chart").scrollIntoView({behavior:"smooth"});
+}
+
+function drawChart(){
+ const canvas=document.getElementById("chart");
+ const ctx=canvas.getContext("2d");
+ const box=canvas.getBoundingClientRect();
+ if(!box.width)return;
+
+ const dpr=window.devicePixelRatio||1;
+ canvas.width=box.width*dpr;
+ canvas.height=230*dpr;
+ ctx.scale(dpr,dpr);
+
+ const w=box.width,h=230;
+ ctx.clearRect(0,0,w,h);
+
+ const id=document.getElementById("chartSelect").value;
+ const item=items.find(x=>String(x.id)===id);
+
+ if(!item||item.history.length===0){
+  ctx.fillStyle="#64748b";
+  ctx.font="14px sans-serif";
+  ctx.textAlign="center";
+  ctx.fillText("상품을 선택하면 가격 그래프가 표시됩니다.",w/2,h/2);
+  return;
+ }
+
+ const values=item.history.map(x=>x.price);
+ const max=Math.max(...values);
+ const min=Math.min(...values);
+ const range=max-min||max*0.1||1;
+ const pad=35;
+
+ ctx.strokeStyle="#334155";
+ ctx.lineWidth=1;
+ for(let i=0;i<4;i++){
+  const y=pad+i*(h-2*pad)/3;
+  ctx.beginPath();
+  ctx.moveTo(30,y);
+  ctx.lineTo(w-10,y);
+  ctx.stroke();
+ }
+
+ const pts=values.map((v,i)=>({
+  x:30+i*(w-40)/Math.max(values.length-1,1),
+  y:pad+(max-v)*(h-2*pad)/range
+ }));
+
+ ctx.strokeStyle="#60a5fa";
+ ctx.lineWidth=3;
+ ctx.beginPath();
+ pts.forEach((p,i)=>{
+  if(i===0)ctx.moveTo(p.x,p.y);
+  else ctx.lineTo(p.x,p.y);
+ });
+ ctx.stroke();
+
+ pts.forEach(p=>{
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,4,0,Math.PI*2);
+  ctx.fillStyle="#60a5fa";
+  ctx.fill();
+ });
+
+ ctx.fillStyle="#94a3b8";
+ ctx.font="12px sans-serif";
+ ctx.textAlign="left";
+ ctx.fillText(money(max),4,pad);
+ ctx.fillText(money(min),4,h-pad);
+}
+
+function exportData(){
+ const blob=new Blob([JSON.stringify(items,null,2)],{
+  type:"application/json"
+ });
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="price-watch-data.json";
+ a.click();
+ URL.revokeObjectURL(a.href);
+}
+
+function clearData(){
+ if(!confirm("모든 상품 기록을 삭제할까요?"))return;
+ items=[];
+ save();
+ render();
+}
+
+window.addEventListener("resize",drawChart);
+render();
+</script>
+</body>
+</html>
