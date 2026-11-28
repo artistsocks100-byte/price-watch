@@ -303,9 +303,9 @@ if (!response.ok) {
 }
 
 
-  const xml = new DOMParser().parseFromString(
-    await response.text(), "text/xml"
-  );
+const xml = new DOMParser().parseFromString(
+  responseText, "text/xml"
+);
 
   if (xml.querySelector("parsererror")) {
     throw new Error("응답을 읽을 수 없습니다.");
