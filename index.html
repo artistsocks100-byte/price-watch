@@ -290,10 +290,8 @@ async function publicRequest(endpoint, params) {
   if (!key) throw new Error("인증키를 입력하세요.");
 
   const url = new URL(PUBLIC_API + "/" + endpoint);
-  url.search = new URLSearchParams({
-    serviceKey: key,
-    ...params
-  });
+  url.search = new URLSearchParams(params);
+url.searchParams.set("serviceKey", key);
 
 const response = await fetch(url);
 const responseText = await response.text();
