@@ -257,5 +257,148 @@ function clearData(){
 window.addEventListener("resize",drawChart);
 render();
 </script>
+
+<section class="card" style="margin-top:20px;padding:20px">
+  <h2>공공데이터 가격 조회</h2>
+  <p>국가데이터처 온라인 수집 가격 정보를 조회합니다.</p>
+
+  <label>공공데이터 인증키</label>
+  <input id="publicKey" type="password" placeholder="일반 인증키 입력">
+
+  <button onclick="loadPublicItems()">품목 목록 불러오기</button>
+
+  <label>조회 품목</label>
+  <select id="publicItem">
+    <option value="">먼저 품목 목록을 불러오세요</option>
+  </select>
+
+  <label>시작 날짜</label>
+  <input id="publicStart" type="date">
+
+  <label>종료 날짜</label>
+  <input id="publicEnd" type="date">
+
+  <button onclick="searchPublicPrices()">가격 조회</button>
+  <pre id="publicResult">조회 결과가 여기에 표시됩니다.</pre>
+</section>
+
+<script>
+const PUBLIC_API = "https://apis.data.go.kr/1240000/bpp_openapi";
+
+async function publicRequest(endpoint, params) {
+  const key = document.getElementById("publicKey").value.trim();
+  if (!key) throw new Error("인증키를 입력하세요.");
+
+  const url = new URL(PUBLIC_API + "/" + endpoint);
+  url.search = new URLSearchParams({
+    serviceKey: key,
+    ...params
+  });
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("HTTP 오류: " + response.status);
+
+  const xml = new DOMParser().parseFromString(
+    await response.text(), "text/xml"
+  );
+
+  if (xml.querySelector("parsererror")) {
+    throw new Error("응답을 읽을 수 없습니다.");
+  }
+
+  const code = xml.querySelector("resultCode")?.textContent;
+  if (code && code !== "00") {
+    throw new Error(
+      xml.querySelector("resultMsg")?.textContent || "API 오류"
+    );
+  }
+
+  return xml;
+}
+
+async function loadPublicItems() {
+  const output = document.getElementById("publicResult");
+  const select = document.getElementById("publicItem");
+
+  output.textContent = "품목 목록을 불러오는 중...";
+
+  try {
+    const xml = await publicRequest("getPriceItemList", {
+      numOfRows: "1000",
+      pageNo: "1"
+    });
+
+    const items = [...xml.querySelectorAll("item")];
+
+    select.innerHTML = "";
+    items.forEach(item => {
+      const code = item.querySelector("ic")?.textContent;
+      const name = item.querySelector("in")?.textContent;
+      if (!code || !name) return;
+
+      const option = document.createElement("option");
+      option.value = code;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+
+    output.textContent = items.length
+      ? "품목 목록을 불러왔습니다."
+      : "품목 데이터가 없습니다.";
+  } catch (error) {
+    output.textContent =
+      "조회 실패: " + error.message +
+      "\n브라우저 CORS 제한일 수 있습니다.";
+  }
+}
+
+async function searchPublicPrices() {
+  const output = document.getElementById("publicResult");
+  const itemCode = document.getElementById("publicItem").value;
+  const start = document.getElementById("publicStart").value.replaceAll("-", "");
+  const end = document.getElementById("publicEnd").value.replaceAll("-", "");
+
+  if (!itemCode || !start || !end) {
+    output.textContent = "품목과 날짜를 선택하세요.";
+    return;
+  }
+
+  const days = (Date.parse(end.slice(0,4)+"-"+end.slice(4,6)+"-"+end.slice(6,8)) -
+    Date.parse(start.slice(0,4)+"-"+start.slice(4,6)+"-"+start.slice(6,8))) /
+    86400000;
+
+  if (days < 0 || days > 30) {
+    output.textContent = "조회 기간은 최대 30일입니다.";
+    return;
+  }
+
+  output.textContent = "가격 정보를 조회하는 중...";
+
+  try {
+    const xml = await publicRequest("getPriceInfo", {
+      itemCode,
+      startDate: start,
+      endDate: end,
+      numOfRows: "1000",
+      pageNo: "1"
+    });
+
+    const items = [...xml.querySelectorAll("item")];
+
+    output.textContent = items.length
+      ? items.map(item =>
+          `${item.querySelector("pn")?.textContent || "상품"} | ` +
+          `${item.querySelector("sd")?.textContent || ""} | ` +
+          `${item.querySelector("sp")?.textContent || "-"}원`
+        ).join("\n")
+      : "조회된 가격 정보가 없습니다.";
+  } catch (error) {
+    output.textContent =
+      "조회 실패: " + error.message +
+      "\n브라우저 CORS 제한일 수 있습니다.";
+  }
+}
+</script>
+
 </body>
 </html>
