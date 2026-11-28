@@ -295,8 +295,17 @@ async function publicRequest(endpoint, params) {
     ...params
   });
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("HTTP 오류: " + response.status);
+const response = await fetch(url);
+const responseText = await response.text();
+
+if (!response.ok) {
+  throw new Error("HTTP " + response.status + ": " + responseText);
+}
+
+const xml = new DOMParser().parseFromString(
+  responseText,
+  "text/xml"
+);
 
   const xml = new DOMParser().parseFromString(
     await response.text(), "text/xml"
